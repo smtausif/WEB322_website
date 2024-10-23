@@ -21,7 +21,7 @@ const app = express();
 const PORT = 3000;
 
 // Serve static content (CSS, JS, images) from the 'public' directory
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Home route serving the home.html file
 app.get('/', (req, res) => {
