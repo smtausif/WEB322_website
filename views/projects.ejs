@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects</title>
+  <link href="/css/main.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <%- include('partials/navbar', { page: '/solutions/projects' }) %>
+
+  <!-- Hero Section -->
+  <section class="hero bg-blue-500 text-white py-12">
+    <div class="container mx-auto text-center">
+      <h2 class="text-4xl font-bold">Projects</h2>
+      <p class="mt-4">Explore projects by sector</p>
+    </div>
+  </section>
+
+  <!-- Projects Table -->
+  <div class="container mx-auto py-10">
+    <table class="w-full text-left table-auto">
+      <thead>
+        <tr>
+          <th class="px-4 py-2">Title</th>
+          <th class="px-4 py-2">Sector</th>
+          <th class="px-4 py-2">Summary</th>
+          <th class="px-4 py-2">Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% projects.forEach(project => { %>
+          <tr>
+            <td class="px-4 py-2"><%= project.title %></td>
+            <td class="px-4 py-2">
+              <a href="/solutions/projects?sector=<%= project.sector %>" class="sector-button"><%= project.sector %></a>
+            </td>
+            <td class="px-4 py-2"><%= project.summary_short %></td>
+            <td class="px-4 py-2">
+              <a href="/solutions/projects/<%= project.id %>" class="details-button">Details</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

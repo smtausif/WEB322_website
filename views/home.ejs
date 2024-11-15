@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Climate Solutions</title>
+  <link href="/css/main.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <%- include('partials/navbar', { page: page }) %>
+
+  <!-- Hero Section -->
+  <section class="hero bg-blue-500 text-white py-12">
+    <div class="container mx-auto text-center">
+      <h2 class="text-4xl font-bold">Explore Climate Solutions</h2>
+      <p class="mt-4">Discover innovative projects to combat climate change.</p>
+      <a href="/solutions/projects" class="btn btn-primary mt-6">Get Started Now</a>
+    </div>
+  </section>
+
+  <!-- Project Grid -->
+  <div class="container mx-auto py-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Project 1 Card -->
+      <div class="card bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
+        <img src="/media/solution_farmlandrestoration01.jpg" alt="Project Image" class="card-img">
+        <div class="p-4 flex-grow">
+          <h3 class="text-xl font-bold">Abandoned Farmland Restoration</h3>
+          <p class="text-gray-700 mt-2">Restoration can bring degraded farmland back into productivity.</p>
+        </div>
+        <div class="p-4">
+          <a href="/solutions/projects/1" class="btn btn-secondary mt-4">More Information</a>
+        </div>
+      </div>
+      
+      <!-- Project 2 Card -->
+      <div class="card bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
+        <img src="/media/solution_bicycle_infrastructure_project3.jpg" alt="Project Image" class="card-img">
+        <div class="p-4 flex-grow">
+          <h3 class="text-xl font-bold">Bicycle Infrastructure</h3>
+          <p class="text-gray-700 mt-2">Infrastructure is essential for supporting safe and abundant bicycle use, which curbs emissions by reducing the need for fossil-fuel-dependent transportation.</p>
+        </div>
+        <div class="p-4">
+          <a href="/solutions/projects/3" class="btn btn-secondary mt-4">More Information</a>
+        </div>
+      </div>
+
+      <!-- Project 3 Card -->
+      <div class="card bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
+        <img src="/media/solution_biomass01.jpg" alt="Project Image" class="card-img">
+        <div class="p-4 flex-grow">
+          <h3 class="text-xl font-bold">Biomass Power</h3>
+          <p class="text-gray-700 mt-2">Biomass feedstock can replace fossil fuels for generating heat and electricity. Perennial biomass offers a "bridge" to a clean, renewable energy future.</p>
+        </div>
+        <div class="p-4">
+          <a href="/solutions/projects/4" class="btn btn-secondary mt-4">More Information</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
