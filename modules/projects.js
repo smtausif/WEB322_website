@@ -13,10 +13,11 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL, // Use DATABASE_URL for connection
+    connectionString: process.env.DATABASE_URL || null, // Use DATABASE_URL
     ssl: {
-        rejectUnauthorized: false, // Ensure SSL is used
+        rejectUnauthorized: false, // Ensures SSL is used
     },
+    port: process.env.PGPORT || 5432, 
 });
 
 // Example: Initialize function to test database connection
