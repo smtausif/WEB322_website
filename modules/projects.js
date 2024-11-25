@@ -14,8 +14,13 @@ const { Pool } = require('pg');
 
 // Create a connection pool
 const pool = new Pool({
+    host: process.env.PGHOST,
+    database: process.env.PGDATABASE,
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    port: process.env.PGPORT,
     ssl: {
-        rejectUnauthorized: false // Enforces secure SSL connection
+        rejectUnauthorized: false // This allows the connection even if the SSL certificate is self-signed
     }
 });
 
