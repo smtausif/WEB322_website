@@ -12,15 +12,14 @@
 
 const { Pool } = require('pg');
 
-// Create a connection pool
 const pool = new Pool({
+    connectionString: process.env.DATABASE_URL, // Use DATABASE_URL for connection
     ssl: {
-        rejectUnauthorized: false, // Ensures SSL is used
+        rejectUnauthorized: false, // Ensure SSL is used
     },
-    connectionString: process.env.DATABASE_URL || null, // Add fallback for DATABASE_URL
 });
 
-// Initialize function (optional, for testing the database connection)
+// Example: Initialize function to test database connection
 function Initialize() {
     return new Promise((resolve, reject) => {
         pool.query('SELECT 1 + 1 AS result')
