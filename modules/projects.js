@@ -1,117 +1,178 @@
 /********************************************************************************
-*  WEB322 – Assignment 02
+*  WEB322 – Assignment 05
 * 
 *  I declare that this assignment is my own work in accordance with Seneca's
 *  Academic Integrity Policy:
 * 
 *  https://www.senecapolytechnic.ca/about/policies/academic-integrity-policy.html
 * 
-*  Name: SM Tausif. Student ID: 187699236. Date: 05.10.24
+*  Name: SM Tausif. Student ID: 187699236. Date: 25.11.24
 *
 ********************************************************************************/
 
-// these comments are for my-self so that i can track and understand when i check it again
-// Load the JSON data from the given files.
-// projectData contains information about various projects.
-// sectorData contains information about sectors related to the projects.
-const projectData = require("../data/projectData");
-const sectorData = require("../data/sectorData");
+const { Pool } = require('pg');
 
-// Initialize an empty array to hold the processed project objects.
-let projects = [];
+// Create a connection pool
+const pool = new Pool({
+    ssl: {
+        rejectUnauthorized: false // Enforces secure SSL connection
+    }
+});
 
-/*
-Initialize function:
-This function processes the projectData array.
-For each project, it finds the corresponding sector name from the sectorData array
-by matching the project's sector_id with the sector's id.
-It then adds the sector name as a new property to each project and pushes it to the projects array.
-The function returns a Promise that resolves once the operation is complete.
-*/
+// Initialize function (optional, for testing the database connection)
 function Initialize() {
     return new Promise((resolve, reject) => {
-        try {
-            // Loop through each project object in projectData
-            projectData.forEach(project => {
-                // Find the matching sector from sectorData using the sector_id
-                const sector = sectorData.find(sectorObj => sectorObj.id === project.sector_id);
-                
-                // Create a new project object with an additional 'sector' property
-                let newProject = {
-                    ...project, // Copy all existing properties of the project
-                    sector: sector ? sector.sector_name : "Unknown" // Add sector name or "Unknown" if not found
-                };
-                
-                // Push the updated project object to the projects array
-                projects.push(newProject);
-            });
-            resolve();  // Successfully completed processing, resolve the Promise with no data
-        } catch (error) {
-            reject("Error initializing projects");  // Handle any errors and reject the Promise with a message
-        }
+        pool.query('SELECT 1 + 1 AS result')
+            .then(() => resolve("Database connected successfully"))
+            .catch((err) => reject(`Error initializing database: ${err.message}`));
     });
 }
 
-/*
-getAllProjects function:
-This function returns the entire projects array.
-It returns a Promise that resolves with the projects array.
-If there are no projects, it rejects the Promise with an appropriate error message.
-*/
 function getAllProjects() {
-    return new Promise((resolve, reject) => {
-        if (projects.length > 0) {
-            resolve(projects);  // Resolve the Promise with the projects array
-        } else {
-            reject("No projects found");  // Reject the Promise if no projects are available
-        }
-    });
+    const query = `
+        SELECT 
+            projects.id, 
+            projects.title, 
+            projects.feature_img_url, 
+            projects.summary_short, 
+            projects.intro_short, 
+            projects.impact, 
+            projects.original_source_url, 
+            sectors.sector_name AS sector
+        FROM projects
+        JOIN sectors ON projects.sector_id = sectors.id
+    `;
+
+    return pool.query(query)
+        .then((res) => res.rows)
+        .catch((err) => {
+            console.error('Error fetching all projects:', err.message);
+            throw new Error("Error retrieving all projects");
+        });
 }
 
-/*
-getProjectById function:
-This function takes a projectId as a parameter and searches for a project with that ID.
-It returns a Promise that resolves with the found project object.
-If no project is found with the given ID, it rejects the Promise with an appropriate message.
-*/
+
 function getProjectById(projectId) {
-    return new Promise((resolve, reject) => {
-        // Find the project that matches the given projectId
-        const project = projects.find(proj => proj.id === projectId);
-        if (project) {
-            resolve(project);  // Resolve the Promise with the found project
-        } else {
-            reject(`Unable to find project with id: ${projectId}`);  // Reject if no project is found
-        }
-    });
+    return pool.query('SELECT * FROM projects WHERE id = $1', [projectId])
+        .then((res) => {
+            if (res.rows.length > 0) {
+                return res.rows[0];
+            } else {
+                throw new Error(`Unable to find project with id: ${projectId}`);
+            }
+        })
+        .catch((err) => {
+            console.error('Error fetching project by ID:', err.message);
+            throw new Error(`Error retrieving project with id: ${projectId}`);
+        });
 }
 
-/*
-getProjectsBySector function:
-This function takes a sector string as a parameter and searches for projects whose sector matches the string.
-The search is case-insensitive and checks if the sector string is part of the project's sector.
-It returns a Promise that resolves with an array of projects that match the sector.
-If no projects are found for the given sector, it rejects the Promise with an appropriate message.
-*/
-function getProjectsBySector(sector) {
-    return new Promise((resolve, reject) => {
-        // Filter the projects array to find projects where the sector contains the given string (case-insensitive)
-        const filteredProjects = projects.filter(proj => 
-            proj.sector.toLowerCase().includes(sector.toLowerCase())
-        );
-        if (filteredProjects.length > 0) {
-            resolve(filteredProjects);  // Resolve the Promise with the filtered array of projects
-        } else {
-            reject(`Unable to find projects in sector: ${sector}`);  // Reject if no projects match the sector
-        }
-    });
+function getProjectsBySector(sectorName) {
+    const query = `
+        SELECT projects.*, sectors.sector_name AS sector 
+        FROM projects 
+        INNER JOIN sectors ON projects.sector_id = sectors.id
+        WHERE LOWER(sectors.sector_name) = LOWER($1)
+    `;
+
+    return pool.query(query, [sectorName])
+        .then((res) => {
+            if (res.rows.length > 0) {
+                return res.rows;
+            } else {
+                throw new Error(`No projects found in sector: ${sectorName}`);
+            }
+        })
+        .catch((err) => {
+            console.error('Error fetching projects by sector:', err.message);
+            throw new Error(`Error retrieving projects in sector: ${sectorName}`);
+        });
 }
 
-// Exporting all the functions so they can be used in other parts of the program.
-// This makes the functions available for other modules to call them.
+
+function addProject(projectData) {
+    const query = `
+        INSERT INTO projects (title, feature_img_url, sector_id, intro_short, summary_short, impact, original_source_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `;
+    const values = [
+        projectData.title,
+        projectData.feature_img_url,
+        projectData.sector_id,
+        projectData.intro_short,
+        projectData.summary_short,
+        projectData.impact,
+        projectData.original_source_url,
+    ];
+
+    return pool.query(query, values)
+        .then(() => "Project added successfully")
+        .catch((err) => {
+            console.error('Error adding project:', err.message);
+            throw new Error(err.message);
+        });
+}
+
+function getAllSectors() {
+    return pool.query('SELECT * FROM sectors')
+        .then((res) => res.rows)
+        .catch((err) => {
+            console.error('Error fetching sectors:', err.message);
+            throw new Error("Error retrieving sectors");
+        });
+}
+
+function editProject(id, projectData) {
+    const query = `
+        UPDATE projects
+        SET 
+            title = $1, 
+            feature_img_url = $2, 
+            sector_id = $3, 
+            intro_short = $4, 
+            summary_short = $5, 
+            impact = $6, 
+            original_source_url = $7
+        WHERE id = $8
+    `;
+    const values = [
+        projectData.title,
+        projectData.feature_img_url,
+        projectData.sector_id,
+        projectData.intro_short,
+        projectData.summary_short,
+        projectData.impact,
+        projectData.original_source_url,
+        id
+    ];
+
+    return pool.query(query, values)
+        .then(() => "Project updated successfully")
+        .catch((err) => {
+            console.error('Error updating project:', err.message);
+            throw new Error(err.message);
+        });
+}
+
+function deleteProject(id) {
+    const query = `DELETE FROM projects WHERE id = $1`;
+
+    return pool.query(query, [id])
+        .then(() => "Project deleted successfully")
+        .catch((err) => {
+            console.error('Error deleting project:', err.message);
+            throw new Error(err.message);
+        });
+}
+
+
 module.exports = {
     Initialize,
     getAllProjects,
     getProjectById,
-    getProjectsBySector
+    getProjectsBySector,
+    addProject,
+    getAllSectors,
+    editProject,
+    deleteProject
 };

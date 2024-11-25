@@ -1,0 +1,24 @@
+
+<link href="/css/main.css" rel="stylesheet">
+<%- include('partials/navbar', { page: '' }) %>
+<h1 class="text-2xl font-bold mb-4">Edit Project</h1>
+
+<form action="/solutions/editProject" method="POST" class="space-y-4">
+    <input type="hidden" name="id" value="<%= project.id %>">
+    <input type="text" name="title" value="<%= project.title %>" placeholder="Project Title" class="input input-bordered w-full" required>
+    <input type="url" name="feature_img_url" value="<%= project.feature_img_url %>" placeholder="Feature Image URL" class="input input-bordered w-full" required>
+
+    <select name="sector_id" class="select select-bordered w-full" required>
+        <% sectors.forEach(sector => { %>
+            <option value="<%= sector.id %>" <%= project.sector_id === sector.id ? 'selected' : '' %>><%= sector.sector_name %></option>
+        <% }) %>
+    </select>
+
+    <textarea name="intro_short" placeholder="Short Introduction" class="textarea textarea-bordered w-full" required><%= project.intro_short %></textarea>
+    <textarea name="summary_short" placeholder="Short Summary" class="textarea textarea-bordered w-full" required><%= project.summary_short %></textarea>
+    <textarea name="impact" placeholder="Impact" class="textarea textarea-bordered w-full" required><%= project.impact %></textarea>
+
+    <input type="url" name="original_source_url" value="<%= project.original_source_url %>" placeholder="Source URL" class="input input-bordered w-full" required>
+
+    <button type="submit" class="btn btn-primary w-full">Update Project</button>
+</form>
